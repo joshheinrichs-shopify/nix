@@ -10,6 +10,7 @@
 #include "tarball.hh"
 #include "tarfile.hh"
 #include "git-utils.hh"
+#include "processes.hh"
 
 #include <optional>
 #include <nlohmann/json.hpp>
@@ -178,6 +179,23 @@ struct GitArchiveInputScheme : InputScheme
     // Search for the longest possible match starting from the begining and ending at either the end or a path segment.
     std::optional<std::string> getAccessToken(const fetchers::Settings & settings, const std::string & host, const std::string & url) const override
     {
+        auto tokenHelper = settings.accessTokenHelper.get();
+        if (! tokenHelper.empty()) {
+            Strings args(std::next(tokenHelper.begin()), tokenHelper.end());
+            auto [status, output] = runProgram(RunOptions{
+                .program = tokenHelper.front(),
+                .args = args,
+                .input = url,
+            });
+            // TODO: this is dogshit
+            if (status != 0)
+                return {};
+            if (output.empty())
+                return {};
+            return output;
+        }
+
+
         auto tokens = settings.accessTokens.get();
         std::string answer;
         size_t answer_match_len = 0;

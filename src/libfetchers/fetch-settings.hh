@@ -66,6 +66,9 @@ struct Settings : public Config
           value.
           )"};
 
+    Setting<Strings> accessTokenHelper{this, {}, "access-token-helper",
+      ""};
+
     Setting<bool> allowDirty{this, true, "allow-dirty",
         "Whether to allow dirty Git/Mercurial trees."};
 
